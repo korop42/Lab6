@@ -1,0 +1,147 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+
+using namespace std;
+
+class Numbered {
+public:
+    virtual int getNumber() const = 0;
+    virtual int getTotalCount() const = 0;
+    virtual ~Numbered() = default;
+};
+
+class StringConvertible {
+public:
+    virtual string toString() const = 0;
+    virtual void fromString(const string& str) = 0;
+    virtual ~StringConvertible() = default;
+};
+
+class MyBaseClass : public Numbered, public StringConvertible {
+private:
+    static int count;
+    int number;
+
+public:
+    MyBaseClass() {
+        count++;
+        number = count;
+    }
+
+    int getNumber() const override {
+        return number;
+    }
+
+    int getTotalCount() const override {
+        return count;
+    }
+
+    string toString() const override {
+        ostringstream oss;
+        oss << number;
+        return oss.str();
+    }
+
+    void fromString(const string& str) override {
+        istringstream iss(str);
+        iss >> number;
+    }
+
+    virtual void someFunction() = 0;
+
+    friend ostream& operator<<(ostream& os, const MyBaseClass& obj) {
+        os << obj.toString();
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, MyBaseClass& obj) {
+        string str;
+        is >> str;
+        obj.fromString(str);
+        return is;
+    }
+};
+
+int MyBaseClass::count = 0;
+
+class DerivedClass1 : public MyBaseClass {
+public:
+    void someFunction() override {
+        cout << "DerivedClass1::someFunction()" << endl;
+    }
+};
+
+class DerivedClass2 : public MyBaseClass {
+public:
+    void someFunction() override {
+        cout << "DerivedClass2::someFunction()" << endl;
+    }
+};
+
+class DerivedClass3 : public MyBaseClass {
+public:
+    void someFunction() override {
+        cout << "DerivedClass3::someFunction()" << endl;
+    }
+};
+
+void printInstances(const Numbered* objects[], int count) {
+    for (int i = 0; i < count; i++) {
+        cout << "Object " << objects[i]->getNumber() << ": " << objects[i]->toString() << endl;
+    }
+}
+
+void sortObjectsByNumber(Numbered* objects[], int count) {
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (objects[j]->getNumber() > objects[j + 1]->getNumber()) {
+                Numbered* temp = objects[j];
+                objects[j] = objects[j + 1];
+                objects[j + 1] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    const int count = 3;
+    Numbered* numberedObjects[count];
+    StringConvertible* stringConvertibleObjects[count];
+
+    numberedObjects[0] = new DerivedClass1();
+    numberedObjects[1] = new DerivedClass3();
+    numberedObjects[2] = new DerivedClass2();
+
+    stringConvertibleObjects[0] = new DerivedClass1();
+    stringConvertibleObjects[1] = new DerivedClass3();
+    stringConvertibleObjects[2] = new DerivedClass2();
+
+    for (int i = 0; i < count; i++) {
+        MyBaseClass* obj = dynamic_cast<MyBaseClass*>(numberedObjects[i]);
+        if (obj != nullptr) {
+            cout << "Object " << obj->getNumber() << ": ";
+            obj->someFunction();
+        }
+    }
+
+    sortObjectsByNumber(numberedObjects, count);
+
+    cout << "After sorting:" << endl;
+    printInstances(numberedObjects, count);
+
+    for (int i = 0; i < count; i++) {
+        cout << "Enter an integer for object " << numberedObjects[i]->getNumber() << ": ";
+        cin >> *numberedObjects[i];
+    }
+
+    cout << "Entered objects:" << endl;
+    printInstances(numberedObjects, count);
+
+    for (int i = 0; i < count; i++) {
+        delete numberedObjects[i];
+        delete stringConvertibleObjects[i];
+    }
+
+    return 0;
+}

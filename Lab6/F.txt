@@ -1,0 +1,32 @@
+#pragma once
+#include<iostream>
+#include<fstream>
+#include<Windows.h>
+#pragma warning(disable: 4996)
+
+using namespace std;
+
+enum
+{
+	Exit, _dir, ReadText, LoadFileToStack, PurgeStack, RenumberStack, ShowStack, DeleteStack, size_1 = 100, slen = 10, sizeoffilename = 20
+};
+
+struct Stack
+{
+	char* info;
+	Stack* next;
+};
+int ChooseFile(char*);
+int EnterNumber(const char*);
+int Readtext(const char*);
+Stack* Createstack(const char*);
+void PrintStack(Stack*);
+void DestroyStack(Stack*&);
+void Reverse(Stack*&);
+void pushStack(Stack*&, char*);
+void popStack(Stack*&);
+int loadFileToStack(const char*, Stack*&);
+void Purgestack(Stack*&);
+void renumberStack(Stack*&);
+void ChangeStr(char*&, int);
+int Menu();
